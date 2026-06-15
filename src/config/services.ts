@@ -52,7 +52,7 @@ export const services: Service[] = [
     id: "lost-found",
     name: "遺失物尋找",
     url: "https://lost.tschool.edu.tw",
-    icon: "SearchX",
+    icon: "PackageSearch",
     tone: "rose",
     roles: ["all"],
     enabled: true,
