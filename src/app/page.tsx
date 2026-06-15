@@ -27,19 +27,8 @@ export default function HomePage() {
           onLogin={() => setSession(FAKE_USER)}
         />
 
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
-          <div className="flex items-center justify-between mb-8">
-            <h2 className="font-extrabold text-2xl text-foreground">
-              校園服務
-            </h2>
-            {!isLoggedIn && (
-              <span className="font-mono text-sm font-bold text-muted-foreground border-2 border-foreground/30 rounded-md px-2 py-0.5">
-                登入後解鎖
-              </span>
-            )}
-          </div>
-
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
             {services.map((service) => (
               <ServiceCard
                 key={service.id}
