@@ -11,7 +11,11 @@ interface HeroSectionProps {
   onLogin: () => void;
 }
 
-export function HeroSection({ isLoggedIn, userName, onLogin }: HeroSectionProps) {
+export function HeroSection({
+  isLoggedIn,
+  userName,
+  onLogin,
+}: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden pt-24 pb-16">
       <div
@@ -36,7 +40,7 @@ export function HeroSection({ isLoggedIn, userName, onLogin }: HeroSectionProps)
                 {userName}，{getGreeting()}！
               </h1>
               <p className="text-xl font-medium text-muted-foreground">
-                今天想點什麼？
+                今天需要什麼服務呢？
               </p>
             </>
           ) : (
