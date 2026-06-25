@@ -6,9 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "start:https": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" NODE_ENV=production node server.mjs",
     "lint": "eslint"
   },
   "dependencies": {
+    "jose": "^6.2.3",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",
     "react": "19.2.4",

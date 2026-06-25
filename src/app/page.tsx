@@ -1,30 +1,44 @@
-"use client";
-
-import { useState } from "react";
+// 門戶首頁。Server Component：在伺服器端讀頂層 cookie、用 JWKS 本地驗章認出使用者。
+// 沒有 "use client"、沒有 useState 假登入——身分完全來自跨網域 cookie 的本地驗章。
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { ServiceCard } from "@/components/ServiceCard";
 import { services } from "@/config/services";
+import { getSession } from "@/lib/tpass-auth";
+import { portalConfig } from "@/config/portal";
 
-const FAKE_USER = {
-  name: "林同學",
-  email: "b111002@tschool.edu.tw",
-  role: "student" as const,
-};
-
-export default function HomePage() {
-  const [session, setSession] = useState<typeof FAKE_USER | null>(null);
+export default async function HomePage() {
+  const session = await getSession();
   const isLoggedIn = session !== null;
 
   return (
     <>
-      <Header isLoggedIn={isLoggedIn} onLogout={() => setSession(null)} />
+      <Header
+        isLoggedIn={isLoggedIn}
+        loginUrl={portalConfig.loginUrl}
+        logoutUrl={portalConfig.logoutUrl}
+      />
+
+      {session && (
+        <div className="border-b-2 border-dashed border-primary/40 bg-primary/5">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5">
+            <p className="font-mono text-[11px] sm:text-xs font-bold text-foreground/80 leading-relaxed">
+              ✓ Portal 本地驗章認得你：
+              <span className="text-primary">{session.name}</span>（
+              {session.email}）· role={session.role}
+              <span className="block text-foreground/50 font-medium">
+                此身分完全由 portal 端 JWKS 本地驗章取得，未回呼 auth 服務。
+              </span>
+            </p>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         <HeroSection
           isLoggedIn={isLoggedIn}
           userName={session?.name ?? "同學"}
-          onLogin={() => setSession(FAKE_USER)}
+          loginUrl={portalConfig.loginUrl}
         />
 
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">

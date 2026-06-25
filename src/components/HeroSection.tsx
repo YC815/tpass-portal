@@ -1,5 +1,4 @@
-"use client";
-
+// Hero 區塊。Server Component：登入是純連結（導去 auth），不需 client 互動。
 function getGreeting() {
   const h = new Date().getHours();
   return h < 12 ? "早安" : h < 18 ? "午安" : "晚安";
@@ -8,7 +7,7 @@ function getGreeting() {
 interface HeroSectionProps {
   isLoggedIn: boolean;
   userName: string;
-  onLogin: () => void;
+  loginUrl: string;
 }
 
 function PassCard({ isLoggedIn, userName }: { isLoggedIn: boolean; userName: string }) {
@@ -77,7 +76,7 @@ function PassCard({ isLoggedIn, userName }: { isLoggedIn: boolean; userName: str
 export function HeroSection({
   isLoggedIn,
   userName,
-  onLogin,
+  loginUrl,
 }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden pt-24 pb-16">
@@ -120,8 +119,8 @@ export function HeroSection({
                 <p className="text-lg font-medium text-muted-foreground max-w-md">
                   TSchool 全校師生的數位生活轉運站。登入一次，解鎖所有校園服務。
                 </p>
-                <button
-                  onClick={onLogin}
+                <a
+                  href={loginUrl}
                   className="inline-flex items-center gap-2.5 rounded-xl border-2 border-foreground bg-card px-6 py-3 font-bold text-foreground shadow-[3px_3px_0_0_var(--color-foreground)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_var(--color-foreground)] active:translate-y-0 active:shadow-[2px_2px_0_0_var(--color-foreground)]"
                 >
                   <svg
@@ -149,7 +148,7 @@ export function HeroSection({
                     />
                   </svg>
                   解鎖 T-Pass — 使用學校 Google 帳號登入
-                </button>
+                </a>
                 <p className="text-xs font-medium text-muted-foreground">
                   僅限 tschool.edu.tw 帳號
                 </p>
