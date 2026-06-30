@@ -57,4 +57,13 @@ export const services: Service[] = [
     roles: ["all"],
     enabled: true,
   },
+  {
+    id: "survey",
+    name: "問卷系統",
+    url: "https://form.tschool.edu.tw",
+    icon: "ClipboardList",
+    tone: "violet",
+    roles: ["all"],
+    enabled: true,
+  },
 ];

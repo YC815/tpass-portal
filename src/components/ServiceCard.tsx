@@ -6,6 +6,7 @@ import {
   Users,
   Megaphone,
   PackageSearch,
+  ClipboardList,
   Lock,
 } from "lucide-react";
 import type { Service, ServiceTone } from "@/config/services";
@@ -16,6 +17,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Users,
   Megaphone,
   PackageSearch,
+  ClipboardList,
 };
 
 const TONE_CLASSES = {
