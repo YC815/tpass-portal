@@ -15,24 +15,10 @@ export default async function HomePage() {
     <>
       <Header
         isLoggedIn={isLoggedIn}
+        userName={session?.name}
         loginUrl={portalConfig.loginUrl}
         logoutUrl={portalConfig.logoutUrl}
       />
-
-      {session && (
-        <div className="border-b-2 border-dashed border-primary/40 bg-primary/5">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5">
-            <p className="font-mono text-[11px] sm:text-xs font-bold text-foreground/80 leading-relaxed">
-              ✓ Portal 本地驗章認得你：
-              <span className="text-primary">{session.name}</span>（
-              {session.email}）· role={session.role}
-              <span className="block text-foreground/50 font-medium">
-                此身分完全由 portal 端 JWKS 本地驗章取得，未回呼 auth 服務。
-              </span>
-            </p>
-          </div>
-        </div>
-      )}
 
       <main className="flex-1">
         <HeroSection

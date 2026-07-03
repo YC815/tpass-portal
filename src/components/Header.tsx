@@ -1,11 +1,12 @@
 // 頂部導覽列。Server Component：登入/登出都是純連結與表單，不需 client 互動。
 interface HeaderProps {
   isLoggedIn: boolean;
+  userName?: string;
   loginUrl: string;
   logoutUrl: string;
 }
 
-export function Header({ isLoggedIn, loginUrl, logoutUrl }: HeaderProps) {
+export function Header({ isLoggedIn, userName, loginUrl, logoutUrl }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 h-16 bg-background/90 backdrop-blur-md border-b-2 border-foreground/20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
@@ -16,7 +17,7 @@ export function Header({ isLoggedIn, loginUrl, logoutUrl }: HeaderProps) {
         {isLoggedIn ? (
           <div className="flex items-center gap-3">
             <span className="rounded-md border-2 border-foreground bg-card px-2 py-0.5 font-mono text-[11px] font-bold text-foreground">
-              已登入
+              {userName ?? "已登入"}
             </span>
             {/* 登出：POST 到 auth，清掉頂層 cookie（同網域生態系一起登出）。 */}
             <form method="post" action={logoutUrl}>
