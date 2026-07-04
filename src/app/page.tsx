@@ -7,9 +7,16 @@ import { services } from "@/config/services";
 import { getSession } from "@/lib/tpass-auth";
 import { portalConfig } from "@/config/portal";
 
-export default async function HomePage() {
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ logout?: string }>;
+}) {
   const session = await getSession();
   const isLoggedIn = session !== null;
+  // logout=1 只是 auth 導回來的畫面提示，不是憑證：只有在 session 確實無效時才採信。
+  const { logout } = await searchParams;
+  const justLoggedOut = !isLoggedIn && logout === "1";
 
   return (
     <>
@@ -25,6 +32,7 @@ export default async function HomePage() {
           isLoggedIn={isLoggedIn}
           userName={session?.name ?? "同學"}
           loginUrl={portalConfig.loginUrl}
+          justLoggedOut={justLoggedOut}
         />
 
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">

@@ -8,6 +8,7 @@ interface HeroSectionProps {
   isLoggedIn: boolean;
   userName: string;
   loginUrl: string;
+  justLoggedOut?: boolean;
 }
 
 function PassCard({ isLoggedIn, userName }: { isLoggedIn: boolean; userName: string }) {
@@ -77,6 +78,7 @@ export function HeroSection({
   isLoggedIn,
   userName,
   loginUrl,
+  justLoggedOut,
 }: HeroSectionProps) {
   return (
     <section className="relative overflow-hidden pt-24 pb-16">
@@ -111,13 +113,15 @@ export function HeroSection({
             ) : (
               <>
                 <span className="rounded-md border-2 border-foreground bg-card px-3 py-1 font-mono text-xs font-bold text-foreground">
-                  BETA
+                  {justLoggedOut ? "已登出" : "BETA"}
                 </span>
                 <h1 className="font-extrabold text-4xl sm:text-5xl text-foreground tracking-tight leading-tight max-w-lg">
-                  校園核心服務門戶
+                  {justLoggedOut ? "您已登出" : "校園核心服務門戶"}
                 </h1>
                 <p className="text-lg font-medium text-muted-foreground max-w-md">
-                  TSchool 全校師生的數位生活轉運站。登入一次，解鎖所有校園服務。
+                  {justLoggedOut
+                    ? "您已安全登出 T-Pass。要繼續使用校園服務，請重新登入。"
+                    : "TSchool 全校師生的數位生活轉運站。登入一次，解鎖所有校園服務。"}
                 </p>
                 <a
                   href={loginUrl}

@@ -141,6 +141,24 @@ POST https://auth.lvh.me:3000/api/auth/logout
 </form>
 ```
 
+**帶 `redirect_uri`（選填）：登出後留在自己的服務**——規則跟登入一樣（完整網址、`*.lvh.me`
+白名單，否則 400）：
+
+```
+POST https://auth.lvh.me:3000/api/auth/logout?redirect_uri=<你的服務完整網址>
+```
+
+```html
+<form method="post" action="https://auth.lvh.me:3000/api/auth/logout?redirect_uri=https://portal.lvh.me:3001">
+  <button type="submit">登出</button>
+</form>
+```
+
+auth 導回時會多帶 `?logout=1`。這**只是畫面提示**，用來讓你顯示「已登出」畫面（例如換一句文案、
+換個 badge）；它**不是身分憑證**，不能拿來判斷登入狀態或做任何權限決策——只有在你已經照 §五
+驗章確認「目前沒有有效 session」時，才可以採信它來換文案。真正的登入狀態永遠只看 cookie +
+本地驗章的結果。
+
 ---
 
 ## 五、⚠️ 重大限制：純前端 SPA 無法直接接

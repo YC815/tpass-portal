@@ -26,8 +26,8 @@ export const portalConfig = {
   jwksUrl: process.env.AUTH_JWKS_URL!,
   // 未登入時導去的登入入口（夾帶 redirect_uri 回到自己）。
   loginUrl: `${process.env.AUTH_LOGIN_URL}?redirect_uri=${encodeURIComponent(self)}`,
-  // 登出：POST 到 auth，清掉頂層 cookie。
-  logoutUrl: process.env.AUTH_LOGOUT_URL!,
+  // 登出：POST 到 auth，清掉頂層 cookie（夾帶 redirect_uri 回到自己，登出後留在門戶）。
+  logoutUrl: `${process.env.AUTH_LOGOUT_URL}?redirect_uri=${encodeURIComponent(self)}`,
   selfUrl: self,
   // 驗章時必須與 auth 簽發端一致。
   issuer: process.env.JWT_ISSUER!,
