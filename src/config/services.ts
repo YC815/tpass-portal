@@ -23,7 +23,7 @@ export const services: Service[] = [
   },
   {
     id: "messages",
-    name: "跨屆傳訊",
+    name: "跨屆代傳",
     url: "https://msg.tschoolsu.org",
     icon: "MessagesSquare",
     tone: "blue",
