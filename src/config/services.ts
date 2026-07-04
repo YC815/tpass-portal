@@ -15,7 +15,7 @@ export const services: Service[] = [
   {
     id: "survey",
     name: "問卷系統",
-    url: "https://form.tschool.edu.tw",
+    url: "https://form.tschoolsu.org",
     icon: "ClipboardList",
     tone: "violet",
     roles: ["all"],
