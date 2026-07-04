@@ -125,7 +125,7 @@ export function HeroSection({
                 </p>
                 <a
                   href={loginUrl}
-                  className="inline-flex items-center gap-2.5 rounded-xl border-2 border-foreground bg-card px-6 py-3 font-bold text-foreground shadow-[3px_3px_0_0_var(--color-foreground)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_var(--color-foreground)] active:translate-y-0 active:shadow-[2px_2px_0_0_var(--color-foreground)]"
+                  className="inline-flex items-center gap-2.5 rounded-xl border-2 border-foreground bg-card px-5 py-3 text-center font-bold leading-snug text-foreground shadow-[3px_3px_0_0_var(--color-foreground)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[5px_5px_0_0_var(--color-foreground)] active:translate-y-0 active:shadow-[2px_2px_0_0_var(--color-foreground)] sm:px-6"
                 >
                   <svg
                     width="18"
@@ -133,6 +133,7 @@ export function HeroSection({
                     viewBox="0 0 18 18"
                     fill="none"
                     aria-hidden="true"
+                    className="shrink-0"
                   >
                     <path
                       d="M17.64 9.205c0-.639-.057-1.252-.164-1.841H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615Z"
@@ -151,7 +152,7 @@ export function HeroSection({
                       fill="#EA4335"
                     />
                   </svg>
-                  解鎖 T-Pass — 使用學校 Google 帳號登入
+                  <span>解鎖 T-Pass — 使用學校 Google 帳號登入</span>
                 </a>
                 <p className="text-xs font-medium text-muted-foreground">
                   僅限 tschool.edu.tw 帳號

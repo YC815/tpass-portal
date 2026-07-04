@@ -15,8 +15,8 @@ export function Header({ isLoggedIn, userName, loginUrl, logoutUrl }: HeaderProp
         </span>
 
         {isLoggedIn ? (
-          <div className="flex items-center gap-3">
-            <span className="rounded-md border-2 border-foreground bg-card px-2 py-0.5 font-mono text-[11px] font-bold text-foreground">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="max-w-[40vw] truncate rounded-md border-2 border-foreground bg-card px-2 py-0.5 font-mono text-[11px] font-bold text-foreground sm:max-w-none">
               {userName ?? "已登入"}
             </span>
             {/* 登出：POST 到 auth，清掉頂層 cookie（同網域生態系一起登出）。 */}
