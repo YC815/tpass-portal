@@ -11,8 +11,8 @@
 
 > 📌 v1.1.0 變更：本文件原為 v1.0.0「Vibe Coding 基底版」草案，部分技術設想（暗色霓虹 UI、
 > Auth.js、`grade` 為數字）在實作階段已調整。本版已將 §2、§3、§4 的技術描述校正為**實際做法**。
-> 願景與背景（§1）維持不變。各細節的權威來源仍是 `t-pass/docs/design.md`（UI）與
-> `auth/INTEGRATION.md`（串接）。
+> 願景與背景（§1）維持不變。各細節的權威來源仍是 `tpass-portal/docs/design.md`（UI）與
+> `tpass-auth/INTEGRATION.md`（串接）。
 
 ---
 
@@ -45,12 +45,12 @@
   - _Vibe Coding 戰略意義_：自動處理 Memoization。AI 粗心少寫優化語法時由編譯器自動擦屁股，免疫無限渲染 Bug。
 - **UI 樣式**：`Tailwind CSS v4`（原子化類名，OKLCH 色彩）
   - _風格定位_：**Playful Tech / Bright Pop Tech，嚴格 light-only Neobrutalism**——白底、重邊框（`border-2`）、
-    hard offset shadow、糖果色調。**沒有暗色模式、沒有霓虹發光**。完整 design system 見 `t-pass/docs/design.md`。
+    hard offset shadow、糖果色調。**沒有暗色模式、沒有霓虹發光**。完整 design system 見 `tpass-portal/docs/design.md`。
   - 圖示用 `lucide-react`。本階段未採用 shadcn/ui（元件直接以 Tailwind 手刻，符合 Neobrutalism 規範）。
-- **身分驗證整合（發證端 `auth/`）**：`arctic`（Google OAuth）+ `jose`（簽 / 驗 JWT）
-  - _做法_：發證端 `auth/` 自行跑 Google OAuth，用 **EdDSA（Ed25519）私鑰簽章** JWT 並寫入頂層 Cookie，
+- **身分驗證整合（發證端 `tpass-auth/`）**：`arctic`（Google OAuth）+ `jose`（簽 / 驗 JWT）
+  - _做法_：發證端 `tpass-auth/` 自行跑 Google OAuth，用 **EdDSA（Ed25519）私鑰簽章** JWT 並寫入頂層 Cookie，
     對外公開 **JWKS 公鑰**。**未使用 Auth.js / NextAuth。** JWT 是**簽章**（可被公鑰驗證），**非加密**。
-  - _消費端_：各服務只拿公鑰本地驗章，不持有私鑰、不回呼 auth。參考實作 `t-pass/src/lib/tpass-auth.ts`。
+  - _消費端_：各服務只拿公鑰本地驗章，不持有私鑰、不回呼 auth。參考實作 `tpass-portal/src/lib/tpass-auth.ts`。
 
 ### 2.2 跨子網域憑證共享機制
 
@@ -63,7 +63,7 @@ T-Pass 採用**「共用網域 Cookie 頂層宣告」**。主入口網與所有�
 當使用者於中央驗證成功後，系統將 JWT Token 寫入瀏覽器 Cookie，並將作用域（Domain）強制指定為點開頭的根網域 **`.tschool.edu.tw`**。此舉可確保師生直接開啟子模組書籤時，瀏覽器會自動攜帶該 Cookie，達成「零跳轉、無感同步登入」的極致體驗。
 
 > ⚙️ **以上網域為上線目標值（正式根網域尚未確定購得）。所有網域 / issuer / audience 皆 env 驅動**
-> （`auth/src/config/auth.ts`、`t-pass/src/config/portal.ts`），程式不寫死。
+> （`tpass-auth/src/config/auth.ts`、`tpass-portal/src/config/portal.ts`），程式不寫死。
 > **本機開發階段**實際跑在 `*.lvh.me`（`auth.lvh.me:3000` / `portal.lvh.me:3001`，cookie `Domain=.lvh.me`），
 > 上線只改 `.env.local`。Cookie 名稱為 `tpass_session`，簽章演算法 `EdDSA`，audience `tschool-sso`。
 
@@ -108,7 +108,7 @@ T-Pass 採用**「共用網域 Cookie 頂層宣告」**。主入口網與所有�
 
 各子模組不需發送網路請求給 T-Pass，只需自瀏覽器提取 Cookie 中的 JWT、用 auth 公開的 **JWKS 公鑰本地驗章**
 即可取得使用者身分（是**驗章**，不是解密——payload 未加密，但需驗簽章）。驗章必做四鐵則：
-鎖 `algorithms: ['EdDSA']`、檢查 `issuer`、檢查 `audience`、檢查 `exp`（完整規則見 `auth/INTEGRATION.md §5`）。
+鎖 `algorithms: ['EdDSA']`、檢查 `issuer`、檢查 `audience`、檢查 `exp`（完整規則見 `tpass-auth/INTEGRATION.md §5`）。
 驗章通過後的 payload 結構如下：
 
 ```json

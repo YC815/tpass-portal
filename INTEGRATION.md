@@ -3,7 +3,7 @@
 這份文件給「要接 T-Pass 單一登入的子模組團隊」。讀完你就能讓自己的服務認出已登入的使用者，
 **完全不需呼叫 auth 服務的 API、不碰 Google、不持有任何密鑰**。
 
-> 本門戶（`t-pass`）本身就是這份合約的**參考實作**。對應檔案：
+> 本門戶（`tpass-portal`）本身就是這份合約的**參考實作**。對應檔案：
 > - `src/lib/tpass-auth.ts` — 驗章核心（**照抄這個就對了**）
 > - `src/config/portal.ts` — 對接所需的設定（env 來源）
 > - `src/app/page.tsx` — 在 Server Component 取得身分並渲染
