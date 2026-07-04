@@ -21,4 +21,13 @@ export const services: Service[] = [
     roles: ["all"],
     enabled: true,
   },
+  {
+    id: "messages",
+    name: "跨屆傳訊",
+    url: "https://msg.tschoolsu.org",
+    icon: "MessagesSquare",
+    tone: "blue",
+    roles: ["all"],
+    enabled: true,
+  },
 ];

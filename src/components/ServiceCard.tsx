@@ -7,6 +7,7 @@ import {
   Megaphone,
   PackageSearch,
   ClipboardList,
+  MessagesSquare,
   Lock,
 } from "lucide-react";
 import type { Service, ServiceTone } from "@/config/services";
@@ -18,6 +19,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   Megaphone,
   PackageSearch,
   ClipboardList,
+  MessagesSquare,
 };
 
 const TONE_CLASSES = {
