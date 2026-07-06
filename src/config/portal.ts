@@ -4,10 +4,12 @@ import "server-only";
 
 const REQUIRED = [
   "AUTH_JWKS_URL",
-  "AUTH_LOGIN_URL",
+  "AUTH_AUTHORIZE_URL",
   "AUTH_LOGOUT_URL",
   "PORTAL_SELF_URL",
+  "TPASS_SERVICE_ID",
   "JWT_ISSUER",
+  // v1 遷移期 fallback 用；v1 停發後可移除
   "JWT_AUDIENCE",
   "TPASS_COOKIE_NAME",
 ] as const;
@@ -20,17 +22,36 @@ if (missing.length > 0) {
 }
 
 const self = process.env.PORTAL_SELF_URL!;
+const serviceId = process.env.TPASS_SERVICE_ID!;
+
+// 登入回跳路徑可帶站內路徑，組成 authorize 入口（契約 v2，見 tpass-auth/INTEGRATION.md §7.1）。
+export function loginUrlFor(returnPath = "/"): string {
+  const u = new URL(process.env.AUTH_AUTHORIZE_URL!);
+  u.searchParams.set("service", serviceId);
+  u.searchParams.set("redirect_uri", `${self}/api/auth/callback`);
+  u.searchParams.set("next", returnPath);
+  return u.toString();
+}
 
 export const portalConfig = {
   // 公鑰來源：portal 只 fetch 這個，本地驗章。
   jwksUrl: process.env.AUTH_JWKS_URL!,
-  // 未登入時導去的登入入口（夾帶 redirect_uri 回到自己）。
-  loginUrl: `${process.env.AUTH_LOGIN_URL}?redirect_uri=${encodeURIComponent(self)}`,
-  // 登出：POST 到 auth，清掉頂層 cookie（夾帶 redirect_uri 回到自己，登出後留在門戶）。
-  logoutUrl: `${process.env.AUTH_LOGOUT_URL}?redirect_uri=${encodeURIComponent(self)}`,
+  // 未登入時導去的授權入口（v2：authorize → form_post token → 本服務 callback）。
+  loginUrl: loginUrlFor("/"),
+  // 登出走自己的 route：先清自己的 cookie，再鏈到 auth 清登入態。
+  logoutUrl: `${self}/api/auth/logout`,
+  // auth 端的登出入口（登出 route 內部用）。
+  authLogoutUrl: process.env.AUTH_LOGOUT_URL!,
   selfUrl: self,
+  serviceId,
   // 驗章時必須與 auth 簽發端一致。
   issuer: process.env.JWT_ISSUER!,
-  audience: process.env.JWT_AUDIENCE!,
-  cookieName: process.env.TPASS_COOKIE_NAME!,
+  // v2：本服務專屬 audience——別的服務的 token 在這裡驗不過（爆炸半徑隔離）。
+  serviceAudience: `tpass:${serviceId}`,
+  // v2：本服務自己的 host-only cookie（不設 Domain，別的子網域收不到）。
+  ownCookieName: "tpass_token",
+  cookieSecure: self.startsWith("https://"),
+  // v1 遷移期 fallback（全生態升級後移除）。
+  legacyAudience: process.env.JWT_AUDIENCE!,
+  legacyCookieName: process.env.TPASS_COOKIE_NAME!,
 } as const;

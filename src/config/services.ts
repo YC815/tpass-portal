@@ -30,4 +30,13 @@ export const services: Service[] = [
     roles: ["all"],
     enabled: true,
   },
+  {
+    id: "appeals",
+    name: "申訴系統",
+    url: "https://appeals.tschoolsu.org",
+    icon: "Gavel",
+    tone: "rose",
+    roles: ["all"],
+    enabled: true,
+  },
 ];

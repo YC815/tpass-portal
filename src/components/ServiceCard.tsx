@@ -8,6 +8,7 @@ import {
   PackageSearch,
   ClipboardList,
   MessagesSquare,
+  Gavel,
   Lock,
 } from "lucide-react";
 import type { Service, ServiceTone } from "@/config/services";
@@ -20,6 +21,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
   PackageSearch,
   ClipboardList,
   MessagesSquare,
+  Gavel,
 };
 
 const TONE_CLASSES = {
