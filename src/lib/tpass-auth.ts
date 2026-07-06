@@ -1,17 +1,20 @@
-// ★ T-Pass SSO 對接的「參考實作」★
+// ★ T-Pass SSO 對接的「參考實作」（契約 v2）★
 // 本檔示範一個子模組（consumer）如何只靠 JWKS 公鑰，在自己後端本地驗章認出使用者，
-// 全程不回呼 auth 服務、不碰 Google、不碰任何私鑰。其他團隊可直接照抄這個檔。
+// 全程不回呼 auth 服務、不碰 Google、不碰任何私鑰。其他團隊可直接照抄這個檔
+// （連同 app/api/auth/callback、app/api/auth/logout 兩個 route）。
 //
-// 安全關鍵（務必照做）：
+// 安全四鐵則（務必照做，缺一不可）：
 //   1. 鎖 algorithms: ['EdDSA'] —— 不鎖會有 alg confusion 偽造風險（公鑰被當對稱密鑰）。
-//   2. 檢查 issuer / audience —— 確認是「這個 auth」「發給我們這個生態系」的票。
-//   3. 驗章只能在 server 端做（cookie 是 HttpOnly，瀏覽器 JS 拿不到）。
+//   2. 檢查 issuer —— 確認票是「這個 auth」簽的。
+//   3. 檢查 audience == tpass:<本服務id> —— 票是簽給「我」的；別的服務的 token 必須驗不過。
+//   4. 檢查 exp（jose 預設會驗）。
+// 驗章只能在 server 端做（cookie 是 HttpOnly，瀏覽器 JS 拿不到）。
 import "server-only";
 import { cookies } from "next/headers";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { portalConfig } from "@/config/portal";
 
-// T-Pass 通行證的身分內容（對接合約，詳見 INTEGRATION.md）。
+// T-Pass 通行證的身分內容（對接合約，詳見 tpass-auth/INTEGRATION.md）。
 export interface TPassClaims {
   sub: string;
   email: string;
@@ -26,12 +29,16 @@ export interface TPassClaims {
 const JWKS = createRemoteJWKSet(new URL(portalConfig.jwksUrl));
 
 // 驗一個 token。失敗（過期 / 竄改 / 錯 iss/aud / 錯演算法）一律回 null，不外拋。
-export async function verifySession(token: string): Promise<TPassClaims | null> {
+// audience 預設鎖本服務專屬值；v1 fallback 時才明確傳入 legacy audience。
+export async function verifySession(
+  token: string,
+  audience: string = portalConfig.serviceAudience,
+): Promise<TPassClaims | null> {
   try {
     const { payload } = await jwtVerify(token, JWKS, {
       algorithms: ["EdDSA"],
       issuer: portalConfig.issuer,
-      audience: portalConfig.audience,
+      audience,
     });
     return {
       sub: payload.sub as string,
@@ -46,9 +53,16 @@ export async function verifySession(token: string): Promise<TPassClaims | null> 
   }
 }
 
-// 從頂層 cookie 讀目前 session，回 claims 或 null。
+// 讀目前 session：先看自己的 host-only cookie（v2），
+// 遷移期 fallback 到 v1 共用 cookie（讓既有登入者不被強制重登；v1 停發後移除）。
 export async function getSession(): Promise<TPassClaims | null> {
-  const token = (await cookies()).get(portalConfig.cookieName)?.value;
-  if (!token) return null;
-  return verifySession(token);
+  const jar = await cookies();
+  const own = jar.get(portalConfig.ownCookieName)?.value;
+  if (own) {
+    const claims = await verifySession(own);
+    if (claims) return claims;
+  }
+  const legacy = jar.get(portalConfig.legacyCookieName)?.value;
+  if (!legacy) return null;
+  return verifySession(legacy, portalConfig.legacyAudience);
 }
