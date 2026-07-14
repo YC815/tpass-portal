@@ -1,11 +1,12 @@
 // 門戶首頁。Server Component：在伺服器端讀頂層 cookie、用 JWKS 本地驗章認出使用者。
 // 沒有 "use client"、沒有 useState 假登入——身分完全來自跨網域 cookie 的本地驗章。
+import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { ServiceCard } from "@/components/ServiceCard";
 import { services } from "@/config/services";
 import { getSession } from "@/lib/tpass-auth";
-import { portalConfig } from "@/config/portal";
+import { portalConfig, loginUrlFor } from "@/config/portal";
 
 export default async function HomePage({
   searchParams,
@@ -17,6 +18,9 @@ export default async function HomePage({
   // logout=1 只是 auth 導回來的畫面提示，不是憑證：只有在 session 確實無效時才採信。
   const { logout } = await searchParams;
   const justLoggedOut = !isLoggedIn && logout === "1";
+
+  // 未登入就直接去 auth 換票（剛登出時不導，否則登不出去）。
+  if (!isLoggedIn && !justLoggedOut) redirect(loginUrlFor("/"));
 
   return (
     <>
