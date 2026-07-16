@@ -2,14 +2,25 @@
   "name": "tpass-portal",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.27.0",
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "@prisma/engines",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
+  },
   "scripts": {
-    "dev": "next dev",
+    "dev": "NODE_TLS_REJECT_UNAUTHORIZED=0 next dev --experimental-https --experimental-https-key $HOME/tpass-certs/key.pem --experimental-https-cert $HOME/tpass-certs/cert.pem -H portal.lvh.me -p 3001",
     "build": "next build",
     "start": "next start",
     "start:https": "NODE_EXTRA_CA_CERTS=\"$(mkcert -CAROOT)/rootCA.pem\" NODE_ENV=production node server.mjs",
     "lint": "eslint"
   },
   "dependencies": {
+    "@next/env": "16.2.9",
     "jose": "^6.2.3",
     "lucide-react": "^1.18.0",
     "next": "16.2.9",

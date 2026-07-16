@@ -10,7 +10,7 @@ This version has breaking changes — APIs, conventions, and file structure may 
 整個生態系的地圖、跨服務規範、`services.json` 註冊表、`tpass` CLI 與部署流程，
 都在上層 **tpass-ops** repo 的 `AGENTS.md` 與 `docs/`。動跨服務的東西前先讀那邊。
 
-- 本機啟動一律用上層的 `scripts/tpass dev portal`（禁止裸 `npm run dev`）。
+- 本機啟動：`pnpm dev`（package.json 已設好 HTTPS + `portal.lvh.me:3001` + 消費端要的 `NODE_TLS_REJECT_UNAUTHORIZED=0`）。憑證放 `$HOME/tpass-certs`。
 - SSO 串接合約（契約 v2）：`../tpass-auth/INTEGRATION.md`（權威）。
 - 本 repo 是**消費端參考實作**：`src/lib/tpass-auth.ts`、`src/config/portal.ts`、
   `src/app/api/auth/{callback,logout}/route.ts` 這四個檔會被其他團隊照抄——
