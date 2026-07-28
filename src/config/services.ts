@@ -7,7 +7,9 @@ export type ServiceTone = "green" | "blue" | "orange" | "violet" | "rose";
 export type UserRole = "student" | "teacher" | "all";
 
 // 必填 env（deploy.sh 與 `tpass check env` 都會解析本陣列，缺 key 在 build 前就擋下）。
-const REQUIRED = ["FORM_URL", "MSG_URL", "APPEALS_URL", "VOTE_URL"] as const;
+// 只列**已上線**服務的 URL。未上線的服務（如 vote）用「有沒有設 URL」當開關——
+// 見下方 enabled；正式站不設就不會出現在大廳，不必為了讓 build 過而填一個死連結。
+const REQUIRED = ["FORM_URL", "MSG_URL", "APPEALS_URL"] as const;
 
 const missing = REQUIRED.filter((key) => !process.env[key]);
 if (missing.length > 0) {
@@ -64,10 +66,11 @@ export const services: Service[] = [
     id: "vote",
     serviceId: "vote",
     name: "T-Vote 選舉",
-    url: process.env.VOTE_URL!,
+    // 未上線：VOTE_URL 沒設就整張卡不出現（大廳只列 enabled 的服務）。
+    url: process.env.VOTE_URL ?? "",
     icon: "Vote",
     tone: "orange",
     roles: ["all"],
-    enabled: true,
+    enabled: Boolean(process.env.VOTE_URL),
   },
 ];
