@@ -7,7 +7,7 @@ export type ServiceTone = "green" | "blue" | "orange" | "violet" | "rose";
 export type UserRole = "student" | "teacher" | "all";
 
 // 必填 env（deploy.sh 與 `tpass check env` 都會解析本陣列，缺 key 在 build 前就擋下）。
-const REQUIRED = ["FORM_URL", "MSG_URL", "APPEALS_URL"] as const;
+const REQUIRED = ["FORM_URL", "MSG_URL", "APPEALS_URL", "VOTE_URL"] as const;
 
 const missing = REQUIRED.filter((key) => !process.env[key]);
 if (missing.length > 0) {
@@ -18,6 +18,9 @@ if (missing.length > 0) {
 
 export interface Service {
   id: string;
+  // 對齊 services.json / auth permissions claim 的服務 id——查該服務的 ban/warning
+  // 狀態就是拿這把 key 去 session.permissions 裡找（見 lib/tpass-auth.ts 的 permOf）。
+  serviceId: string;
   name: string;
   url: string;
   icon: string;
@@ -29,6 +32,7 @@ export interface Service {
 export const services: Service[] = [
   {
     id: "survey",
+    serviceId: "form",
     name: "問卷系統",
     url: process.env.FORM_URL!,
     icon: "ClipboardList",
@@ -38,6 +42,7 @@ export const services: Service[] = [
   },
   {
     id: "messages",
+    serviceId: "msg",
     name: "跨屆代傳",
     url: process.env.MSG_URL!,
     icon: "MessagesSquare",
@@ -47,10 +52,21 @@ export const services: Service[] = [
   },
   {
     id: "appeals",
+    serviceId: "appeals",
     name: "申訴系統",
     url: process.env.APPEALS_URL!,
     icon: "Gavel",
     tone: "rose",
+    roles: ["all"],
+    enabled: true,
+  },
+  {
+    id: "vote",
+    serviceId: "vote",
+    name: "T-Vote 選舉",
+    url: process.env.VOTE_URL!,
+    icon: "Vote",
+    tone: "orange",
     roles: ["all"],
     enabled: true,
   },

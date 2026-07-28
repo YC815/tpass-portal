@@ -4,9 +4,11 @@ import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
 import { HeroSection } from "@/components/HeroSection";
 import { ServiceCard } from "@/components/ServiceCard";
+import { WarningBanner } from "@/components/WarningBanner";
+import { AdminAccessCard } from "@/components/AdminAccessCard";
 import { services } from "@/config/services";
-import { getSession } from "@/lib/tpass-auth";
-import { portalConfig, loginUrlFor } from "@/config/portal";
+import { getSession, permOf } from "@/lib/tpass-auth";
+import { portalConfig, loginUrlFor, deniedUrlFor } from "@/config/portal";
 
 export default async function HomePage({
   searchParams,
@@ -22,6 +24,15 @@ export default async function HomePage({
   // 未登入就直接去 auth 換票（剛登出時不導，否則登不出去）。
   if (!isLoggedIn && !justLoggedOut) redirect(loginUrlFor("/"));
 
+  // read 守門：正常情況 ban 在 authorize 階段就被攔下、根本換不到 token；這裡是給
+  // 「舊票在被 ban 之後、過期之前」的窗口用的防禦層（見 INTEGRATION.md 權限變更生效時間）。
+  const ownPerm = session ? permOf(session) : null;
+  if (ownPerm && !ownPerm.read) redirect(deniedUrlFor(portalConfig.serviceId));
+
+  // 大廳 token 帶全服務 map（含 "auth"）；role !== "default" 才顯示「權限管理」入口。
+  const authPerm = session ? permOf(session, "auth") : null;
+  const canManagePermissions = authPerm ? authPerm.role !== "default" : false;
+
   return (
     <>
       <Header
@@ -32,6 +43,12 @@ export default async function HomePage({
       />
 
       <main className="flex-1">
+        {ownPerm?.restriction === "warning" && (
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 pt-6">
+            <WarningBanner reason={ownPerm.reason} until={ownPerm.until} />
+          </div>
+        )}
+
         <HeroSection
           isLoggedIn={isLoggedIn}
           userName={session?.name ?? "同學"}
@@ -46,8 +63,12 @@ export default async function HomePage({
                 key={service.id}
                 service={service}
                 isLocked={!isLoggedIn}
+                restriction={
+                  session ? permOf(session, service.serviceId).restriction : undefined
+                }
               />
             ))}
+            {canManagePermissions && <AdminAccessCard url={portalConfig.adminUrl} />}
           </div>
         </section>
       </main>

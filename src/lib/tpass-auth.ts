@@ -14,14 +14,42 @@ import { cookies } from "next/headers";
 import { createRemoteJWKSet, jwtVerify } from "jose";
 import { portalConfig } from "@/config/portal";
 
+// 權限 claim 契約（見 tpass-auth/INTEGRATION.md §3）。role 三級、admin 隱含 moderator；
+// restriction 省略＝none；read 是唯一必看欄位，auth 已經算好（= restriction !== "ban"）。
+export type Role = "admin" | "moderator" | "default";
+export type Restriction = "none" | "warning" | "ban";
+
+export interface PermissionEntry {
+  read: boolean;
+  role: Role;
+  restriction?: Restriction;
+  reason?: string;
+  until?: number;
+}
+
+export type PermissionMap = Record<string, PermissionEntry>;
+
 // T-Pass 通行證的身分內容（對接合約，詳見 tpass-auth/INTEGRATION.md）。
 export interface TPassClaims {
   sub: string;
   email: string;
   name: string;
-  // 授權章：此持有人在本服務屬於哪些群組（例 admin / super-admin）。授權只看這個。
-  groups: string[];
+  // per-service 權限本體。一般服務 token 只含自己一把 key；本服務若在
+  // AUTH_OVERVIEW_SERVICE_IDS（門戶）內，token 帶全服務 map（含 "auth"）。
+  permissions: PermissionMap;
   exp: number;
+}
+
+// 安全預設值：claim 缺 permissions，或缺該 serviceId 這把 key（舊票／非 overview
+// 服務對別的 serviceId 沒有資料）→ 一律視為「能讀、預設角色」，不因缺資料而誤鎖使用者。
+const DEFAULT_PERMISSION_ENTRY: PermissionEntry = { read: true, role: "default" };
+
+// 讀某人在某服務的權限。不傳 serviceId 預設查「自己這個服務」。
+export function permOf(
+  session: TPassClaims,
+  serviceId: string = portalConfig.serviceId,
+): PermissionEntry {
+  return session.permissions[serviceId] ?? { ...DEFAULT_PERMISSION_ENTRY };
 }
 
 // createRemoteJWKSet 內建記憶體快取 + 依 kid 選鑰 + 金鑰輪替時自動重抓（含冷卻）。
@@ -42,7 +70,7 @@ export async function verifySession(
       sub: payload.sub as string,
       email: payload.email as string,
       name: payload.name as string,
-      groups: Array.isArray(payload.groups) ? (payload.groups as string[]) : [],
+      permissions: (payload.permissions as PermissionMap | undefined) ?? {},
       exp: payload.exp as number,
     };
   } catch {

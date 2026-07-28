@@ -30,6 +30,20 @@ export function loginUrlFor(returnPath = "/"): string {
   return u.toString();
 }
 
+// auth 的 origin：/denied 與 /admin 都掛在 auth 網域下，用同一個 origin 推導，
+// 不另外寫死網域——上線只要 AUTH_AUTHORIZE_URL 對，這兩個就自動對。
+const authOrigin = new URL(process.env.AUTH_AUTHORIZE_URL!).origin;
+
+// 選填：ban 頁網址；未設就用 authOrigin + /denied（本機/正式站通常都不用另外設）。
+const deniedBaseUrl = process.env.AUTH_DENIED_URL || `${authOrigin}/denied`;
+
+// read===false（被 ban 且未過期）時導去的頁面；帶 service 讓 /denied 知道查哪個服務的原因。
+export function deniedUrlFor(serviceId: string): string {
+  const u = new URL(deniedBaseUrl);
+  u.searchParams.set("service", serviceId);
+  return u.toString();
+}
+
 export const portalConfig = {
   // 公鑰來源：portal 只 fetch 這個，本地驗章。
   jwksUrl: process.env.AUTH_JWKS_URL!,
@@ -39,6 +53,8 @@ export const portalConfig = {
   logoutUrl: `${self}/api/auth/logout`,
   // auth 端的登出入口（登出 route 內部用）。
   authLogoutUrl: process.env.AUTH_LOGOUT_URL!,
+  // auth 的 /admin 權限管理 panel；permissions.auth.role !== "default" 才顯示入口。
+  adminUrl: `${authOrigin}/admin`,
   selfUrl: self,
   serviceId,
   // 驗章時必須與 auth 簽發端一致。
