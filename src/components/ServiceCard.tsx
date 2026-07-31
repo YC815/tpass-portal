@@ -1,31 +1,9 @@
 "use client";
 
-import {
-  UtensilsCrossed,
-  CalendarCheck,
-  Users,
-  Megaphone,
-  PackageSearch,
-  ClipboardList,
-  MessagesSquare,
-  Gavel,
-  Vote,
-  Lock,
-} from "lucide-react";
+import { UtensilsCrossed, Lock } from "lucide-react";
+import { ICON_MAP } from "@/config/icons";
 import type { Service, ServiceTone } from "@/config/services";
 import type { Restriction } from "@/lib/tpass-auth";
-
-const ICON_MAP: Record<string, React.ElementType> = {
-  UtensilsCrossed,
-  CalendarCheck,
-  Users,
-  Megaphone,
-  PackageSearch,
-  ClipboardList,
-  MessagesSquare,
-  Gavel,
-  Vote,
-};
 
 const TONE_CLASSES = {
   green:  { cardBg: "bg-tone-green-bg",  iconText: "text-tone-green-text"  },

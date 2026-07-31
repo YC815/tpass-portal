@@ -58,14 +58,13 @@ export default async function HomePage({
 
         <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {services.filter((s) => s.enabled).map((service) => (
+            {/* 清單已由 registry 過濾（enabled + deployed + 有卡片資訊），這裡不再自己篩。 */}
+            {services.map((service) => (
               <ServiceCard
                 key={service.id}
                 service={service}
                 isLocked={!isLoggedIn}
-                restriction={
-                  session ? permOf(session, service.serviceId).restriction : undefined
-                }
+                restriction={session ? permOf(session, service.id).restriction : undefined}
               />
             ))}
             {canManagePermissions && <AdminAccessCard url={portalConfig.adminUrl} />}
