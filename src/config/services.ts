@@ -1,76 +1,46 @@
-// 門戶發射台的服務卡片。
-// ⚠️ 網址一律 env 驅動，**絕不寫死網域**——寫死的話本機門戶會把人送去正式站，
-// 本機根本測不了 SSO 互通（2026-07-13 踩過這個坑）。本機填 *.lvh.me:<port>，主機填正式網域。
+// 門戶發射台的服務卡片，全部由 tpass-registry 的 services.json 派生。
+// ⚠️ 這裡不再有硬編碼的服務清單，也不再有 <SVC>_URL 環境變數——
+// 加一個服務 = 對 tpass-registry 開一個 PR，portal 這邊零改動、零新 env。
+// 網址由 subdomain + domains + port 推導（見 lib/registry.ts 的 urlFor），
+// 所以「絕不寫死網域」這條鐵則從此不必靠人記得遵守（2026-07-13 踩過那個坑）。
 import "server-only";
+import { lobbyServices, urlFor, type RegistryService } from "@/lib/registry";
+import { ICON_MAP, ICON_NAMES } from "@/config/icons";
+import { portalConfig } from "@/config/portal";
 
 export type ServiceTone = "green" | "blue" | "orange" | "violet" | "rose";
 export type UserRole = "student" | "teacher" | "all";
 
-// 必填 env（deploy.sh 與 `tpass check env` 都會解析本陣列，缺 key 在 build 前就擋下）。
-// 只列**已上線**服務的 URL。未上線的服務（如 vote）用「有沒有設 URL」當開關——
-// 見下方 enabled；正式站不設就不會出現在大廳，不必為了讓 build 過而填一個死連結。
-const REQUIRED = ["FORM_URL", "MSG_URL", "APPEALS_URL"] as const;
-
-const missing = REQUIRED.filter((key) => !process.env[key]);
-if (missing.length > 0) {
-  throw new Error(
-    `[config/services] 缺少必填環境變數：${missing.join(", ")}（請檢查 .env.local）`,
-  );
-}
-
 export interface Service {
+  // ＝ services.json 的服務 id ＝ auth permissions claim 的 key——查該服務的
+  // ban/warning 狀態就是拿它去 session.permissions 裡找（見 lib/tpass-auth.ts 的 permOf）。
   id: string;
-  // 對齊 services.json / auth permissions claim 的服務 id——查該服務的 ban/warning
-  // 狀態就是拿這把 key 去 session.permissions 裡找（見 lib/tpass-auth.ts 的 permOf）。
-  serviceId: string;
   name: string;
   url: string;
   icon: string;
   tone: ServiceTone;
   roles: UserRole[];
-  enabled: boolean;
 }
 
-export const services: Service[] = [
-  {
-    id: "survey",
-    serviceId: "form",
-    name: "問卷系統",
-    url: process.env.FORM_URL!,
-    icon: "ClipboardList",
-    tone: "violet",
-    roles: ["all"],
-    enabled: true,
-  },
-  {
-    id: "messages",
-    serviceId: "msg",
-    name: "跨屆代傳",
-    url: process.env.MSG_URL!,
-    icon: "MessagesSquare",
-    tone: "blue",
-    roles: ["all"],
-    enabled: true,
-  },
-  {
-    id: "appeals",
-    serviceId: "appeals",
-    name: "申訴系統",
-    url: process.env.APPEALS_URL!,
-    icon: "Gavel",
-    tone: "rose",
-    roles: ["all"],
-    enabled: true,
-  },
-  {
-    id: "vote",
-    serviceId: "vote",
-    name: "T-Vote 選舉",
-    // 未上線：VOTE_URL 沒設就整張卡不出現（大廳只列 enabled 的服務）。
-    url: process.env.VOTE_URL ?? "",
-    icon: "Vote",
-    tone: "orange",
-    roles: ["all"],
-    enabled: Boolean(process.env.VOTE_URL),
-  },
-];
+// tone / roles 的合法值在 registry 那邊已由 validate.mjs（PR CI）擋過，這裡只做型別收斂。
+// 圖示是唯一 registry 驗不到的欄位（它不認識 lucide），所以在這裡擋——
+// 不認得就直接炸，不要靜默換一個圖示讓人上線後才發現卡片長錯。
+function toCard(s: RegistryService): Service {
+  if (!ICON_MAP[s.portal!.icon]) {
+    throw new Error(
+      `[config/services] 服務「${s.id}」的 portal.icon =「${s.portal!.icon}」不在圖示白名單裡。\n` +
+        `  要嘛改用現有的：${ICON_NAMES.join(", ")}\n` +
+        `  要嘛在 src/config/icons.ts 的 ICON_MAP 加一行（lucide-react 的 PascalCase 名稱）。`,
+    );
+  }
+  return {
+    id: s.id,
+    name: s.portal!.label,
+    url: urlFor(s, portalConfig.selfUrl),
+    icon: s.portal!.icon,
+    tone: s.portal!.tone as ServiceTone,
+    roles: s.portal!.roles as UserRole[],
+  };
+}
+
+export const services: Service[] = lobbyServices().map(toCard);
