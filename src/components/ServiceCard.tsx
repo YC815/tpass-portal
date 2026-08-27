@@ -3,7 +3,7 @@
 import { UtensilsCrossed, Lock } from "lucide-react";
 import { ICON_MAP } from "@/config/icons";
 import type { Service, ServiceTone } from "@/config/services";
-import type { Restriction } from "@/lib/tpass-auth";
+import type { Restriction } from "tpass-auth-js";
 
 const TONE_CLASSES = {
   green:  { cardBg: "bg-tone-green-bg",  iconText: "text-tone-green-text"  },

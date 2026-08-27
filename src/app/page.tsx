@@ -7,15 +7,14 @@ import { ServiceCard } from "@/components/ServiceCard";
 import { WarningBanner } from "@/components/WarningBanner";
 import { AdminAccessCard } from "@/components/AdminAccessCard";
 import { services } from "@/config/services";
-import { getSession, permOf } from "@/lib/tpass-auth";
-import { portalConfig, loginUrlFor, deniedUrlFor } from "@/config/portal";
+import { tpass, portalConfig, loginUrlFor, deniedUrlFor } from "@/config/portal";
 
 export default async function HomePage({
   searchParams,
 }: {
   searchParams: Promise<{ logout?: string }>;
 }) {
-  const session = await getSession();
+  const session = await tpass.getSession();
   const isLoggedIn = session !== null;
   // logout=1 只是 auth 導回來的畫面提示，不是憑證：只有在 session 確實無效時才採信。
   const { logout } = await searchParams;
@@ -26,11 +25,11 @@ export default async function HomePage({
 
   // read 守門：正常情況 ban 在 authorize 階段就被攔下、根本換不到 token；這裡是給
   // 「舊票在被 ban 之後、過期之前」的窗口用的防禦層（見 INTEGRATION.md 權限變更生效時間）。
-  const ownPerm = session ? permOf(session) : null;
+  const ownPerm = session ? tpass.permOf(session) : null;
   if (ownPerm && !ownPerm.read) redirect(deniedUrlFor(portalConfig.serviceId));
 
   // 大廳 token 帶全服務 map（含 "auth"）；role !== "default" 才顯示「權限管理」入口。
-  const authPerm = session ? permOf(session, "auth") : null;
+  const authPerm = session ? tpass.permOf(session, "auth") : null;
   const canManagePermissions = authPerm ? authPerm.role !== "default" : false;
 
   return (
@@ -64,7 +63,7 @@ export default async function HomePage({
                 key={service.id}
                 service={service}
                 isLocked={!isLoggedIn}
-                restriction={session ? permOf(session, service.id).restriction : undefined}
+                restriction={session ? tpass.permOf(session, service.id).restriction : undefined}
               />
             ))}
             {canManagePermissions && <AdminAccessCard url={portalConfig.adminUrl} />}
