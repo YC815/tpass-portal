@@ -77,9 +77,18 @@ export default async function HomePage({
           <span className="font-mono text-sm font-extrabold text-foreground">
             T<span className="text-primary">-</span>Pass
           </span>
-          <span className="font-mono text-xs font-bold text-muted-foreground">
-            © 2026 TSchool 學生會數位部
-          </span>
+          <div className="flex items-center gap-4">
+            {/* 回報入口（B5）：學生撞到 bug 的唯一出口，別拿掉。目的地見 app/feedback/route.ts。 */}
+            <a
+              href="/feedback"
+              className="font-mono text-xs font-bold text-foreground underline decoration-2 underline-offset-4 hover:text-primary"
+            >
+              回報問題
+            </a>
+            <span className="font-mono text-xs font-bold text-muted-foreground">
+              © 2026 TSchool 學生會數位部
+            </span>
+          </div>
         </div>
       </footer>
     </>
