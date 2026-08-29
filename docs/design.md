@@ -4,6 +4,23 @@
 
 ---
 
+## 元件在 `tpass-ui` 套件
+
+```
+pnpm add github:tschoolsu/tpass-ui#v1.0.0
+```
+
+`globals.css`：
+```css
+@import "tailwindcss";
+@import "tpass-ui/theme.css";
+@source "../../node_modules/tpass-ui/dist";
+```
+
+不要在服務裡手刻 `src/components/ui/primitives.tsx`，元件要改去 `tpass-ui` 改。
+
+---
+
 ## Color Tokens
 
 所有顏色使用 OKLCH。禁止使用 hex 或 rgb。
@@ -94,6 +111,8 @@ active:translate-y-0
 | `rounded-xl`   | ~1.4rem | icon 框、按鈕 |
 | `rounded-2xl`  | ~1.8rem | 卡片 |
 | `rounded-full` | 9999px  | 頭像圓形 |
+
+> ⚠️ 上表的衍生值從未落地——所有服務實際用 Tailwind 預設 scale（`rounded-md=0.375rem`、`rounded-xl=0.75rem`、`rounded-2xl=1rem`），`tpass-ui/theme.css` 照現況不 override。2026-08-29 核對。
 
 ---
 
