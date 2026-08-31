@@ -20,6 +20,7 @@ import {
   Ticket,
   Trophy,
   Wrench,
+  Scale,
 } from "lucide-react";
 
 export const ICON_MAP: Record<string, React.ElementType> = {
@@ -39,6 +40,7 @@ export const ICON_MAP: Record<string, React.ElementType> = {
   Ticket,
   Trophy,
   Wrench,
+  Scale,
 };
 
 export const ICON_NAMES = Object.keys(ICON_MAP);

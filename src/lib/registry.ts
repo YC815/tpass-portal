@@ -19,7 +19,10 @@ export interface RegistryService {
   name: string;
   dir: string;
   subdomain: string;
-  port: number;
+  // external（hosting 見下）沒有主機上的行程可連，port 是 null。
+  port: number | null;
+  // 選填，缺省視為 "host"。"external" = 不在主機上跑（例如純前端、託管在 GitHub Pages）。
+  hosting?: "host" | "external";
   enabled: boolean;
   deployed: boolean;
   portal?: RegistryPortalCard;
@@ -62,8 +65,12 @@ export const registry = load();
 // 正式站與本機的差別只有網域與要不要帶 port——由自己的 SELF_URL 判斷身在何處，
 // 不新增 env、也不靠 NODE_ENV（本機 production smoke 會判錯）。
 export function urlFor(service: RegistryService, selfUrl: string): string {
-  const host = new URL(selfUrl).hostname;
   const prod = registry.domains.prod;
+  // external 沒有本機實例（例如純前端、託管在 GitHub Pages）：不管門戶自己跑在本機還是
+  // 正式站，這張卡永遠連去它唯一的正式網址——本機也測不了它，因為它本來就不在這個生態系的
+  // dev 迴圈裡。
+  if (service.hosting === "external") return `https://${service.subdomain}.${prod}`;
+  const host = new URL(selfUrl).hostname;
   const isProd = host === prod || host.endsWith("." + prod);
   return isProd
     ? `https://${service.subdomain}.${prod}`
