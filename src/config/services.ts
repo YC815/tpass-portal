@@ -9,7 +9,7 @@ import { ICON_MAP, ICON_NAMES } from "@/config/icons";
 import { portalConfig } from "@/config/portal";
 
 export type ServiceTone = "green" | "blue" | "orange" | "violet" | "rose";
-export type UserRole = "student" | "teacher" | "all";
+export type ServiceCategory = "governance" | "service" | "event";
 
 export interface Service {
   // ＝ services.json 的服務 id ＝ auth permissions claim 的 key——查該服務的
@@ -19,10 +19,18 @@ export interface Service {
   url: string;
   icon: string;
   tone: ServiceTone;
-  roles: UserRole[];
+  category: ServiceCategory;
 }
 
-// tone / roles 的合法值在 registry 那邊已由 validate.mjs（PR CI）擋過，這裡只做型別收斂。
+// 大廳分區的順序與標題。治理排最前——會員大會、選舉這類正式流程時效性高，
+// 別被日常服務的卡片數量稀釋掉。
+export const CATEGORY_SECTIONS: { key: ServiceCategory; label: string }[] = [
+  { key: "governance", label: "治理" },
+  { key: "service", label: "生活服務" },
+  { key: "event", label: "限定活動" },
+];
+
+// tone / category 的合法值在 registry 那邊已由 validate.mjs（PR CI）擋過，這裡只做型別收斂。
 // 圖示是唯一 registry 驗不到的欄位（它不認識 lucide），所以在這裡擋——
 // 不認得就直接炸，不要靜默換一個圖示讓人上線後才發現卡片長錯。
 function toCard(s: RegistryService): Service {
@@ -39,7 +47,7 @@ function toCard(s: RegistryService): Service {
     url: urlFor(s, portalConfig.selfUrl),
     icon: s.portal!.icon,
     tone: s.portal!.tone as ServiceTone,
-    roles: s.portal!.roles as UserRole[],
+    category: s.portal!.category as ServiceCategory,
   };
 }
 

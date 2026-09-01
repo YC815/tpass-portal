@@ -11,7 +11,7 @@ export interface RegistryPortalCard {
   label: string;
   icon: string;
   tone: string;
-  roles: string[];
+  category: string;
 }
 
 export interface RegistryService {

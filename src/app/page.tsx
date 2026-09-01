@@ -6,7 +6,7 @@ import { HeroSection } from "@/components/HeroSection";
 import { ServiceCard } from "@/components/ServiceCard";
 import { WarningBanner } from "@/components/WarningBanner";
 import { AdminAccessCard } from "@/components/AdminAccessCard";
-import { services } from "@/config/services";
+import { services, CATEGORY_SECTIONS } from "@/config/services";
 import { tpass, portalConfig, loginUrlFor, deniedUrlFor } from "@/config/portal";
 
 export default async function HomePage({
@@ -55,19 +55,32 @@ export default async function HomePage({
           justLoggedOut={justLoggedOut}
         />
 
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-            {/* 清單已由 registry 過濾（enabled + deployed + 有卡片資訊），這裡不再自己篩。 */}
-            {services.map((service) => (
-              <ServiceCard
-                key={service.id}
-                service={service}
-                isLocked={!isLoggedIn}
-                restriction={session ? tpass.permOf(session, service.id).restriction : undefined}
-              />
-            ))}
-            {canManagePermissions && <AdminAccessCard url={portalConfig.adminUrl} />}
-          </div>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-12 flex flex-col gap-10">
+          {/* 清單已由 registry 過濾（enabled + deployed + 有卡片資訊），這裡只依 category 分區，不再自己篩。 */}
+          {CATEGORY_SECTIONS.map(({ key, label }) => {
+            const sectionServices = services.filter((s) => s.category === key);
+            if (sectionServices.length === 0) return null;
+            return (
+              <div key={key}>
+                <h2 className="font-mono text-xs font-bold text-muted-foreground uppercase tracking-wide mb-3 pb-2 border-b-2 border-dashed border-foreground/30">
+                  {label}
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                  {sectionServices.map((service) => (
+                    <ServiceCard
+                      key={service.id}
+                      service={service}
+                      isLocked={!isLoggedIn}
+                      restriction={session ? tpass.permOf(session, service.id).restriction : undefined}
+                    />
+                  ))}
+                  {key === "governance" && canManagePermissions && (
+                    <AdminAccessCard url={portalConfig.adminUrl} />
+                  )}
+                </div>
+              </div>
+            );
+          })}
         </section>
       </main>
 
