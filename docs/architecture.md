@@ -10,29 +10,15 @@
 
 ## 服務清單：為什麼 portal 不擁有它
 
-Launchpad 不寫死任何服務，也**不維護自己的服務清單**。清單的唯一真相是並排的
-public repo `YC815/tpass-registry` 的 `services.json`，portal 在 build 時讀
-`../tpass-registry/services.json`（見 `src/lib/registry.ts`）。
+大廳卡片全部派生自 public repo `tschoolsu/tpass-registry` 的 `services.json`（portal 在 build 時讀
+`../tpass-registry/services.json`，見 `src/lib/registry.ts`）；欄位定義與登記流程見該 repo 的 README
+與上層 `docs/handbook/04-registry-sop.md`，這裡不重述。以下只記 portal 自己的決策理由。
 
-**卡片的每一格都是派生的**：
+### 為什麼要從硬編碼改成派生（2026-07-31）
 
-| 卡片欄位 | 來自 |
-| --- | --- |
-| 顯示名、圖示、配色、可見角色 | 該服務的 `portal` 區塊 |
-| 網址 | `subdomain` + 頂層 `domains` + `port` 推導（本機帶 port、正式不帶） |
-| 出不出現 | `enabled && deployed && portal != null` |
-
-### 為什麼要這樣改（2026-07-31）
-
-在此之前，卡片清單是 `src/config/services.ts` 裡的一個硬編碼陣列，網址靠一個一個
-`<SVC>_URL` 環境變數注入。結果是「登記一個服務」要同時碰三個 repo、五個位置
-（ops 的 `services.json`、portal 的陣列、portal 的 `REQUIRED`、portal 本機 `.env.local`、
-portal 主機 `.env.local`），而且**漏掉任何一處都是無聲失敗**——最典型的是改動沒 merge 進
-`tpass-portal` main，主機 `git pull` 拉到的還是舊清單，本機看得到卡片、線上永遠看不到。
-
-改成派生之後，登記一個服務 = 對 `tpass-registry` 開一個 PR，portal 零改動、零新 env。
-`<SVC>_URL` 這類環境變數全部廢除，連帶消滅了「新增 `REQUIRED` key 卻沒同步主機 `.env.local`，
-害下一個部署 portal 的人 build 失敗」那條連鎖。
+以前卡片是 `src/config/services.ts` 的硬編碼陣列 + 一顆顆 `<SVC>_URL` env，登記一個服務要碰
+三個 repo、五個位置，漏任何一處都是無聲失敗（最典型：本機看得到卡片、線上永遠看不到）。
+改成派生後，登記 = 對 `tpass-registry` 開一個 PR，portal 零改動、零新 env。
 
 ### 為什麼是讀檔而不是打 API
 

@@ -7,7 +7,7 @@
 ## 元件在 `tpass-ui` 套件
 
 ```
-pnpm add github:tschoolsu/tpass-ui#v1.0.0
+pnpm add github:tschoolsu/tpass-ui#v1.1.0
 ```
 
 `globals.css`：

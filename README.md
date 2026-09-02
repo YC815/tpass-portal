@@ -1,30 +1,36 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# tpass-portal（T-Pass 門戶大廳）
 
-## Getting Started
+T-Pass 生態系的發射台：師生用學校 Google 帳號登入一次，看到自己有權進的服務卡片。
+同時是 **SSO 消費端參考實作**——其他服務照抄它的串接寫法：
+`src/config/portal.ts`（把 env 綁進 `tpass-auth-js`）+ `src/app/api/auth/{callback,logout}/route.ts`（各一行）。
 
-First, run the development server:
+## 本機跑
 
 ```bash
-pnpm dev
+pnpm install
+pnpm dev        # https://portal.lvh.me:3001（package.json 已設好 HTTPS + NODE_TLS_REJECT_UNAUTHORIZED=0）
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+憑證在 `$HOME/tpass-certs`（上層 `scripts/tpass setup` 產生）。要一次跑 auth + portal + 其他服務用上層 `scripts/tpass dev`。
+註冊表 `../tpass-registry/services.json` 必須並排存在，大廳卡片由它派生（`src/lib/registry.ts`），portal 不自帶服務清單。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+檢查：`pnpm lint` + `pnpm exec tsc --noEmit`。
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 環境變數
 
-## Learn More
+範本 `.env.example`，真值寫 `.env.local`（不進 git）。必填清單的真相在 `src/config/portal.ts`
+（`configFromEnv("PORTAL_SELF_URL")`，其餘由 `tpass-auth-js` 定義：`AUTH_JWKS_URL` / `AUTH_AUTHORIZE_URL` /
+`AUTH_LOGOUT_URL` / `TPASS_SERVICE_ID` / `JWT_ISSUER`）。缺就 fail closed。
 
-To learn more about Next.js, take a look at the following resources:
+## 部署
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`tpass deploy portal`（上層 tpass-ops CLI）。註冊表改了要重部署 portal 才會反映到卡片。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 資料庫
 
-## Deploy on Vercel
+沒有。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 文件
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 本 repo 的 agent 規則：`AGENTS.md`；portal 自己的架構決策：`docs/architecture.md`；design system：`docs/design.md`。
+- SSO 合約：`tpass-auth/INTEGRATION.md`。生態系地圖與部員手冊：上層 tpass-ops 的 `AGENTS.md` 與 `docs/handbook/`。
