@@ -4,7 +4,7 @@
 // 為什麼是讀檔而不是打 API：註冊表是「部署時就決定好」的靜態事實，
 // 讓大廳在 runtime 依賴另一個服務活著，只是把一個 git merge 換成一個故障點。
 import "server-only";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 
 export interface RegistryPortalCard {
@@ -34,14 +34,23 @@ export interface Registry {
   services: RegistryService[];
 }
 
-// 佈局：~/tpass/{tpass-registry,tpass-portal,…}，本機與主機同構，所以上一層一定找得到。
-// TPASS_REGISTRY_PATH 是逃生門（CI、非標準 checkout）。
+// 本機佈局：tpass-registry 與 tpass-portal 並排，所以上一層一定找得到。
+// 主機佈局（2026-09 重建後）不同構：服務 repo 在 /home/service/<dir>，註冊表是同層的裸檔。
+// 查找順序：TPASS_REGISTRY_PATH（逃生門：CI、非標準 checkout）
+//        → /home/service/service.json（主機佈局，重建後的唯一真相）
+//        → ../tpass-registry/services.json（本機並排 clone）。
 // 這裡與下面的 readFileSync 都要 turbopackIgnore：路徑不是靜態的，少標任何一處，
 // Turbopack 的檔案追蹤就會把整個專案當成需要打包的資產，build 時噴
 // 「the whole project was traced unintentionally」警告。
+const HOST_REGISTRY = "/home/service/service.json";
+
 function locate(): string {
   const override = process.env.TPASS_REGISTRY_PATH;
   if (override) return isAbsolute(override) ? override : resolve(/* turbopackIgnore: true */ process.cwd(), override);
+  // 主機（2026-09 重建後）：註冊表是 /home/service/service.json 這個裸檔，跟服務 repo 同層。
+  // 存在才用——本機沒有這條路徑，不會誤判。
+  if (existsSync(/* turbopackIgnore: true */ HOST_REGISTRY)) return HOST_REGISTRY;
+  // 本機：並排 clone 的 tpass-registry repo。
   return join(/* turbopackIgnore: true */ process.cwd(), "..", "tpass-registry", "services.json");
 }
 
@@ -54,7 +63,7 @@ function load(): Registry {
       `[lib/registry] 讀不到服務註冊表：${file}\n` +
         `  註冊表是並排的 public repo，在 tpass-portal 的上一層 clone 一次：\n` +
         `    git clone https://github.com/tschoolsu/tpass-registry.git\n` +
-        `  或用 TPASS_REGISTRY_PATH 指到 services.json 的實際位置。\n` +
+        `  主機上則應該有 /home/service/service.json。\n  或用 TPASS_REGISTRY_PATH 指到註冊表檔案的實際位置。\n` +
         `  原始錯誤：${(e as Error).message}`,
     );
   }
